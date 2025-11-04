@@ -8,7 +8,7 @@ from app.models.reviews import Review as ReviewModel
 from app.schemas import Review as ReviewSchema, ReviewCreate
 from app.models.products import Product as ProductModel
 from app.models.users import User as UserModel
-from app.auth import get_current_buyer
+from app.auth import get_current_buyer, get_current_admin
 
 router = APIRouter(
     prefix='/reviews',
@@ -24,7 +24,7 @@ async def update_product_rating(db: AsyncSession, product_id: int):
     )
     avg_rating = result.scalar() or 0.0
     product = await db.get(ProductModel, product_id)
-    product.rating = avg_rating
+    product.rating = round(avg_rating, 2)
     await db.commit()
 
 @router.get('/', response_model=list[ReviewSchema], status_code=status.HTTP_200_OK)
@@ -60,8 +60,24 @@ async def create_review(review: ReviewCreate, db: AsyncSession = Depends(get_asy
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='The product has been deleted or does not exist')
     db_review = ReviewModel(**review.model_dump(), user_id=current_user.id)
     db.add(db_review)
-    await update_product_rating(db, db_review.product_id)
+    await update_product_rating(db, review.product_id)
     await db.commit()
     await db.refresh(db_review)
     return db_review
 
+@router.delete('/reviews/{review_id}')
+async def delete_review(review_id: int, db: AsyncSession = Depends(get_async_db), current_user: UserModel = Depends(get_current_admin)):
+    """
+    Удаление отзыва (доступно только админу)
+    """
+    stmt_review = await db.scalars(select(ReviewModel).where(ReviewModel.id == review_id, ReviewModel.is_active == True))
+    result_review = stmt_review.first()
+    if result_review is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    await db.execute(
+        update(ReviewModel).where(ReviewModel.id == review_id).values(is_active=False)
+    )
+    await update_product_rating(db, result_review.product_id)
+    await db.commit()
+    await db.refresh(result_review)
+    return result_review

@@ -36,7 +36,7 @@ async def create_product(
     current_user: UserModel = Depends(get_current_seller)
 ):
     """
-    Создаёт новый товар, привязанный к текущему продавцу (только для 'seller').
+    Создаёт новый товар, привязанный к текущему продавцу (только для 'seller' или 'admin').
     """
     category_result = await db.scalars(
         select(CategoryModel).where(CategoryModel.id == product.category_id, CategoryModel.is_active == True)
