@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .categories import Category
+    from .reviews import Review
 
 class Product(Base):
     __tablename__ = "products"
@@ -20,6 +21,8 @@ class Product(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
     seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    rating: Mapped[float] = mapped_column(Numeric(1, 2), nullable=False, default=0.0)
 
     category: Mapped["Category"] = relationship("Category", back_populates="products")
     seller = relationship("User", back_populates="products")
+    reviews: Mapped[list['Review']] = relationship('Review', back_populates='product')

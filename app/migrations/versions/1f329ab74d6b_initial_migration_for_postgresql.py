@@ -37,6 +37,7 @@ def upgrade() -> None:
     sa.Column('image_url', sa.String(length=200), nullable=True),
     sa.Column('stock', sa.Integer(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('rating', sa.Boolean(), nullable=False),
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.PrimaryKeyConstraint('id')
