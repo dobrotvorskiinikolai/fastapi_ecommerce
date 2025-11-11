@@ -174,7 +174,7 @@ async def update_product(
         update(ProductModel).where(ProductModel.id == product_id).values(**product.model_dump())
     )
     await db.commit()
-    await db.refresh(db_product)  # Для консистентности данных
+    await db.refresh(db_product) 
     return db_product
 
 
@@ -200,5 +200,5 @@ async def delete_product(
         update(ProductModel).where(ProductModel.id == product_id).values(is_active=False)
     )
     await db.commit()
-    await db.refresh(product)  # Для возврата is_active = False
+    await db.refresh(product) 
     return product
