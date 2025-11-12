@@ -10,7 +10,6 @@ from app.models.users import User as UserModel
 from app.config import SECRET_KEY, ALGORITHM
 from app.db_depends import get_async_db
 
-# Создаём контекст для хеширования с использованием bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
@@ -32,7 +31,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_refresh_token(data: dict):          # New
+def create_refresh_token(data: dict):        
     """
     Создаёт рефреш-токен с длительным сроком действия.
     """
